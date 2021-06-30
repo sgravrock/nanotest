@@ -1,7 +1,9 @@
 import assert from 'assert';
-import Runner from '../runner.js';
+import Runner from './runner.js';
 
-it('#test regisers a test', () => {
+const outerRunner = new Runner();
+
+outerRunner.test('#test regisers a test', () => {
 	const subject = new Runner(new MockLogger());
 	function f1() {}
 	function f2() {}
@@ -15,7 +17,7 @@ it('#test regisers a test', () => {
 	]);
 });
 
-it('#run runs each test', () => {
+outerRunner.test('#run runs each test', () => {
 	const subject = new Runner(new MockLogger());
 	let f1Called = false, f2Called = false;
 	function f1() { f1Called = true; }
@@ -29,7 +31,7 @@ it('#run runs each test', () => {
 	assert(f2Called);
 });
 
-it('#run reports success when a test does not throw', () => {
+outerRunner.test('#run reports success when a test does not throw', () => {
 	const logger = new MockLogger();
 	const subject = new Runner(logger);
 	subject.test('a test', () => {});
@@ -39,7 +41,7 @@ it('#run reports success when a test does not throw', () => {
 	assert.strictEqual(logger.calls.log[0], 'PASS: a test');
 });
 
-it('#run reports failure when a test throws', () => {
+outerRunner.test('#run reports failure when a test throws', () => {
 	const logger = new MockLogger();
 	const subject = new Runner(logger);
 	const error = new Error('nope');
@@ -68,3 +70,5 @@ class MockLogger {
 		this.calls.error.push(e);
 	}
 }
+
+outerRunner.run();

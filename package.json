@@ -5,10 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "jasmine"
+    "test": "node self-test.js"
   },
-  "author": "Stephen Gravrock",
-  "devDependencies": {
-    "jasmine": "github:jasmine/jasmine-npm"
-  }
+  "author": "Stephen Gravrock"
 }
