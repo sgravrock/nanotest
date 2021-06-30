@@ -1,3 +1,5 @@
+import GlobalErrorRouter from './globalErrorRouter.js';
+
 export default class Runner {
 
 	constructor(deps) {
@@ -5,6 +7,8 @@ export default class Runner {
 		this._logger = deps.logger || console;
 		this._setTimeout = deps.setTimeout || setTimeout;
 		this._clearTimeout = deps.clearTimeout || clearTimeout;
+		this._globalErrorRouter = deps.globalErrorRouter ||
+			new GlobalErrorRouter(process);
 		this.tests = [];
 	}
 
@@ -13,12 +17,37 @@ export default class Runner {
 	}
 
 	async run() {
+		let currentRunner;
+		this._globalErrorRouter.install(error => {
+			currentRunner.handleGlobalError(error);
+		});
+
 		for (const test of this.tests) {
-			await this._runOne(test);
+			currentRunner = this._makeSingleRunner(test);
+			await currentRunner.run();
 		}
+
+		this._globalErrorRouter.uninstall();
 	}
 
-	async _runOne(test) {
+	_makeSingleRunner(test) {
+		return new SingleRunner(test, {
+			setTimeout: this._setTimeout,
+			clearTimeout: this._clearTimeout,
+			logger: this._logger,
+		});
+	}
+}
+
+class SingleRunner {
+	constructor(test, deps) {
+		this._test = test;
+		this._setTimeout = deps.setTimeout;
+		this._clearTimeout = deps.clearTimeout;
+		this._logger = deps.logger;
+	}
+
+	async run() {
 		const timeoutToken = {};
 		let timeoutId;
 		const timeoutPromise = new Promise(resolve => {
@@ -29,19 +58,27 @@ export default class Runner {
 		let token;
 
 		try {
-			token = await Promise.race([test.fn(), timeoutPromise]);
+			token = await Promise.race([this._test.fn(), timeoutPromise]);
 		} catch (e) {
 			this._clearTimeout(timeoutId);
-			this._logger.log('FAIL: ' + test.name);
+			this._logger.log('FAIL: ' + this._test.name);
 			this._logger.error(e);
 			return;
 		}
 
 		if (token === timeoutToken) {
-			this._logger.log('FAIL: ' + test.name + ' (timed out)');
+			this._logger.log('FAIL: ' + this._test.name + ' (timed out)');
+		} else if (this._receivedGlobalError) {
+			this._logger.log('FAIL: ' + this._test.name);
+			this._clearTimeout(timeoutId);
 		} else {
 			this._clearTimeout(timeoutId);
-			this._logger.log('PASS: ' + test.name);
+			this._logger.log('PASS: ' + this._test.name);
 		}
+	}
+
+	handleGlobalError(error) {
+		this._logger.error(error);
+		this._receivedGlobalError = true;
 	}
 }
