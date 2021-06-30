@@ -11,14 +11,19 @@ export default class Runner {
 
 	async run() {
 		for (const test of this.tests) {
-			try {
-				await test.fn();
-			} catch (e) {
-				this.logger.log('FAIL: ' + test.name);
-				this.logger.error(e);
-			}
-
-			this.logger.log('PASS: ' + test.name);
+			await this._runOne(test);
 		}
+	}
+
+	async _runOne(test) {
+		try {
+			await test.fn();
+		} catch (e) {
+			this.logger.log('FAIL: ' + test.name);
+			this.logger.error(e);
+			return;
+		}
+
+		this.logger.log('PASS: ' + test.name);
 	}
 }

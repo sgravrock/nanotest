@@ -37,7 +37,7 @@ export default function(outerRunner) {
 	
 		await subject.run();
 	
-		assert.strictEqual(logger.calls.log[0], 'PASS: a test');
+		assert.deepStrictEqual(logger.calls.log, ['PASS: a test']);
 	});
 	
 	outerRunner.test('#run reports failure when a test throws', async () => {
@@ -48,8 +48,8 @@ export default function(outerRunner) {
 	
 		await subject.run();
 	
-		assert.strictEqual(logger.calls.log[0], 'FAIL: a test');
-		assert.strictEqual(logger.calls.error[0], error);
+		assert.deepStrictEqual(logger.calls.log, ['FAIL: a test']);
+		assert.deepStrictEqual(logger.calls.error, [error]);
 	});
 	
 	outerRunner.test('#run waits for an async test to finish before reporting', async () => {
