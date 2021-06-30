@@ -1,0 +1,14 @@
+{
+  "name": "nanotest",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "jasmine"
+  },
+  "author": "Stephen Gravrock",
+  "devDependencies": {
+    "jasmine": "github:jasmine/jasmine-npm"
+  }
+}
