@@ -59,26 +59,26 @@ class SingleRunner {
 
 		try {
 			token = await Promise.race([this._test.fn(), timeoutPromise]);
-		} catch (e) {
-			this._clearTimeout(timeoutId);
-			this._logger.log('FAIL: ' + this._test.name);
-			this._logger.error(e);
-			return;
+		} catch (error) {
+			this._logger.error(error);
+			this._errored = true;
 		}
 
 		if (token === timeoutToken) {
 			this._logger.log('FAIL: ' + this._test.name + ' (timed out)');
-		} else if (this._receivedGlobalError) {
-			this._logger.log('FAIL: ' + this._test.name);
-			this._clearTimeout(timeoutId);
 		} else {
 			this._clearTimeout(timeoutId);
-			this._logger.log('PASS: ' + this._test.name);
+
+			if (this._errored) {
+				this._logger.log('FAIL: ' + this._test.name);
+			} else {
+				this._logger.log('PASS: ' + this._test.name);
+			}
 		}
 	}
 
 	handleGlobalError(error) {
 		this._logger.error(error);
-		this._receivedGlobalError = true;
+		this._errored = true;
 	}
 }
