@@ -1,3 +1,4 @@
+import assert from 'assert';
 import Runner from '../runner.js';
 
 describe('runner', () => {
@@ -10,7 +11,7 @@ describe('runner', () => {
 			subject.test('f1', f1);
 			subject.test('f2', f2);
 
-			expect(subject.tests).toEqual([
+			assert.deepStrictEqual(subject.tests, [
 				{name: 'f1', fn: f1},
 				{name: 'f2', fn: f2},
 			]);
@@ -28,8 +29,8 @@ describe('runner', () => {
 
 			subject.run();
 
-			expect(f1Called).toBe(true);
-			expect(f2Called).toBe(true);
+			assert(f1Called);
+			assert(f2Called);
 		});
 
 		it('reports success when a test does not throw', () => {
@@ -39,7 +40,7 @@ describe('runner', () => {
 
 			subject.run();
 
-			expect(logger.calls.log[0]).toEqual('PASS: a test');
+			assert.strictEqual(logger.calls.log[0], 'PASS: a test');
 		});
 
 		it('reports failure when a test throws', () => {
@@ -50,8 +51,8 @@ describe('runner', () => {
 
 			subject.run();
 
-			expect(logger.calls.log[0]).toEqual('FAIL: a test');
-			expect(logger.calls.error[0]).toEqual(error);
+			assert.strictEqual(logger.calls.log[0], 'FAIL: a test');
+			assert.strictEqual(logger.calls.error[0], error);
 		});
 	});
 });
