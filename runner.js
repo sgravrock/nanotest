@@ -9,10 +9,10 @@ export default class Runner {
 		this.tests.push({name, fn});
 	}
 
-	run() {
+	async run() {
 		for (const test of this.tests) {
 			try {
-				test.fn();
+				await test.fn();
 			} catch (e) {
 				this.logger.log('FAIL: ' + test.name);
 				this.logger.error(e);
